@@ -47,6 +47,13 @@ jobs:
         run: |
           flake8 backend/
 
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          while ! pg_isready -h db -p 5432 -U django -d django; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 2
+          done
+
       - name: Run migrations
         env:
           DB_HOST: db
