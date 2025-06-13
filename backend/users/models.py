@@ -2,7 +2,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import RegexValidator
 
-
 class User(AbstractUser):
     email = models.EmailField(
         max_length=254,
@@ -35,8 +34,8 @@ class User(AbstractUser):
         verbose_name="Аватар",
     )
 
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
+    USERNAME_FIELD = 'username'  
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']  
 
     class Meta:
         verbose_name = "Пользователь"
@@ -44,7 +43,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username or self.email
-
 
 class Subscription(models.Model):
     user = models.ForeignKey(
