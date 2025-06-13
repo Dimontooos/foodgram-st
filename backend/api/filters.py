@@ -1,6 +1,8 @@
 from django_filters import rest_framework as filters
+
 from recipes.models import Recipe, Ingredient
 from users.models import User
+
 
 class RecipeFilter(filters.FilterSet):
     author = filters.NumberFilter(method='filter_author')
@@ -17,17 +19,21 @@ class RecipeFilter(filters.FilterSet):
         return queryset.filter(author__id=value)
 
     def filter_favorited(self, queryset, name, value):
-        queryset = queryset.select_related('author').prefetch_related('favorited_by')
+        queryset = queryset.select_related('author').prefetch_related(
+            'favorited_by'
+        )
         if not self.request or self.request.user.is_anonymous:
-            return queryset  
+            return queryset
         if value:
             return queryset.filter(favorited_by__user=self.request.user)
         return queryset.exclude(favorited_by__user=self.request.user)
 
     def filter_shopping_cart(self, queryset, name, value):
-        queryset = queryset.select_related('author').prefetch_related('in_shopping_cart')
+        queryset = queryset.select_related('author').prefetch_related(
+            'in_shopping_cart'
+        )
         if not self.request or self.request.user.is_anonymous:
-            return queryset 
+            return queryset
         if value:
             return queryset.filter(in_shopping_cart__user=self.request.user)
         return queryset.exclude(in_shopping_cart__user=self.request.user)
