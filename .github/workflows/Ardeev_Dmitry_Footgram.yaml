@@ -14,7 +14,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:14.0  # Синхронизируем с docker-compose.yml
+        image: postgres:14.0  # Синхронизировано с docker-compose.yml
         env:
           POSTGRES_USER: django
           POSTGRES_PASSWORD: qwerty
@@ -23,9 +23,9 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10  # Увеличиваем количество попыток
+          --health-interval 15s
+          --health-timeout 10s
+          --health-retries 10
 
     steps:
       - name: Checkout code
@@ -36,12 +36,12 @@ jobs:
       - name: Install PostgreSQL client
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-client  # Устанавливаем pg_isready
+          sudo apt-get install -y postgresql-client  # Установка pg_isready
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'  # Синхронизируем с Dockerfile
+          python-version: '3.10'  # Синхронизировано с Dockerfile
 
       - name: Install dependencies
         run: |
@@ -69,7 +69,7 @@ jobs:
               break
             fi
             echo "Waiting for PostgreSQL to be ready... (attempt $i/30)"
-            sleep 5  # Увеличиваем интервал ожидания
+            sleep 5
             if [ $i -eq 30 ]; then
               echo "PostgreSQL is not ready after 30 attempts. Exiting..."
               exit 1
@@ -103,6 +103,12 @@ jobs:
         run: |
           cd backend
           python manage.py call_to_bd
+
+      - name: Check PostgreSQL status on failure
+        if: failure()
+        run: |
+          docker ps
+          docker logs $(docker ps -q -f 'ancestor=postgres:14.0')  # Логи для диагностики
 
   build_and_push_backend_to_docker_hub:
     needs: build
