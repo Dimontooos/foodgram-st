@@ -2,7 +2,6 @@ from rest_framework import serializers
 from django.core.files.base import ContentFile
 import base64
 import uuid
-from typing import List, Dict, Any
 
 from users.models import User, Subscription
 from recipes.models import (
@@ -12,7 +11,7 @@ from djoser.serializers import TokenCreateSerializer as BaseTokenCreateSerialize
 
 
 class Base64ImageField(serializers.ImageField):
-    def to_internal_value(self, data: str) -> ContentFile:
+    def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
             try:
                 format, imgstr = data.split(';base64,')
@@ -46,7 +45,7 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
             'last_name': {'required': True}
         }
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs):
         if User.objects.filter(email=attrs['email']).exists():
             raise serializers.ValidationError(
                 {"email": "Этот email уже зарегистрирован."}
@@ -57,7 +56,7 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
             )
         return attrs
 
-    def validate_password(self, value: str) -> str:
+    def validate_password(self, value):
         if value.strip() != value:
             raise serializers.ValidationError(
                 'Пароль не может содержать пробелы в начале или конце.'
@@ -68,7 +67,7 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
             )
         return value
 
-    def create(self, validated_data: Dict[str, Any]) -> User:
+    def create(self, validated_data):
         try:
             user = User.objects.create_user(
                 email=validated_data['email'],
@@ -105,7 +104,7 @@ class UserSerializer(serializers.ModelSerializer):
             'avatar': {'read_only': True, 'allow_null': True}
         }
 
-    def get_is_subscribed(self, obj: User) -> bool:
+    def get_is_subscribed(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
             return Subscription.objects.filter(
@@ -121,7 +120,7 @@ class UserWithRecipesSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         fields = UserSerializer.Meta.fields + ['recipes', 'recipes_count']
 
-    def get_recipes(self, obj: User) -> List[Dict[str, Any]]:
+    def get_recipes(self, obj):
         request = self.context.get('request')
         recipes_limit = request.query_params.get('recipes_limit')
         queryset = obj.recipes.all()
@@ -134,7 +133,7 @@ class UserWithRecipesSerializer(UserSerializer):
             queryset, many=True, context=self.context
         ).data
 
-    def get_recipes_count(self, obj: User) -> int:
+    def get_recipes_count(self, obj):
         return obj.recipes.count()
 
 
@@ -158,7 +157,7 @@ class SetPasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(required=True)
     current_password = serializers.CharField(required=True)
 
-    def validate_new_password(self, value: str) -> str:
+    def validate_new_password(self, value):
         if value.strip() != value:
             raise serializers.ValidationError(
                 'Пароль не может содержать пробелы в начале или конце.'
@@ -215,7 +214,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'id', 'author', 'is_favorited', 'is_in_shopping_cart'
         )
 
-    def get_is_favorited(self, obj: Recipe) -> bool:
+    def get_is_favorited(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
             return Favorite.objects.filter(
@@ -223,7 +222,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             ).exists()
         return False
 
-    def get_is_in_shopping_cart(self, obj: Recipe) -> bool:
+    def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
             return ShoppingCart.objects.filter(
@@ -241,7 +240,7 @@ class RecipeWithShortLinkSerializer(RecipeSerializer):
             'short_link',
         )
 
-    def get_short_link(self, obj: Recipe) -> str:
+    def get_short_link(self, obj):
         request = self.context.get('request')
         short_link, created = ShortLink.objects.get_or_create(
             recipe=obj, defaults={'short_code': str(uuid.uuid4())[:8]}
@@ -274,7 +273,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('id',)
 
-    def validate_name(self, value: str) -> str:
+    def validate_name(self, value):
         if not value.strip():
             raise serializers.ValidationError(
                 "Поле 'name' не может быть пустым."
@@ -285,21 +284,21 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             )
         return value
 
-    def validate_text(self, value: str) -> str:
+    def validate_text(self, value):
         if not value.strip():
             raise serializers.ValidationError(
                 "Поле 'text' не может быть пустым."
             )
         return value
 
-    def validate_cooking_time(self, value: int) -> int:
+    def validate_cooking_time(self, value):
         if value < 1:
             raise serializers.ValidationError(
                 "Время приготовления должно быть больше или равно 1."
             )
         return value
 
-    def validate_ingredients(self, value: List[Dict[str, int]]) -> List[Dict[str, int]]:
+    def validate_ingredients(self, value):
         if not value:
             raise serializers.ValidationError(
                 "Добавьте хотя бы один ингредиент."
@@ -309,7 +308,8 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         for item in value:
             if not isinstance(item, dict) or 'id' not in item or 'amount' not in item:
                 raise serializers.ValidationError(
-                    "Каждый ингредиент должен быть объектом с полями id и amount."
+                    "Каждый ингредиент должен быть объектом с полями id и "
+                    "amount."
                 )
 
             amount = item['amount']
@@ -332,7 +332,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
         return value
 
-    def create_ingredients(self, ingredients_data: List[Dict[str, int]], recipe: Recipe) -> None:
+    def create_ingredients(self, ingredients_data, recipe):
         ingredients = [
             IngredientInRecipe(
                 recipe=recipe,
@@ -343,14 +343,14 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         ]
         IngredientInRecipe.objects.bulk_create(ingredients)
 
-    def create(self, validated_data: Dict[str, Any]) -> Recipe:
+    def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients')
         validated_data['author'] = self.context['request'].user
         recipe = Recipe.objects.create(**validated_data)
         self.create_ingredients(ingredients_data, recipe)
         return recipe
 
-    def update(self, instance: Recipe, validated_data: Dict[str, Any]) -> Recipe:
+    def update(self, instance, validated_data):
         if 'ingredients' not in validated_data:
             raise serializers.ValidationError(
                 {"ingredients": "Это поле обязательно."}
@@ -384,14 +384,14 @@ class ShortLinkSerializer(serializers.ModelSerializer):
         model = ShortLink
         fields = ('short_link',)
 
-    def get_short_link(self, obj: ShortLink) -> str:
+    def get_short_link(self, obj):
         request = self.context.get('request')
         base_url = request.build_absolute_uri('/')[:-1]
         return f"{base_url}/s/{obj.short_code}"
 
 
 class CustomTokenCreateSerializer(BaseTokenCreateSerializer):
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs):
         possible_email_fields = [
             'username', 'login', 'user', 'userName', 'emailAddress'
         ]
