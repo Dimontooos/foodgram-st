@@ -14,7 +14,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15-alpine
+        image: postgres:14.0  # Синхронизируем с docker-compose.yml
         env:
           POSTGRES_USER: django
           POSTGRES_PASSWORD: qwerty
@@ -25,7 +25,7 @@ jobs:
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 10  # Увеличиваем количество попыток
 
     steps:
       - name: Checkout code
@@ -33,10 +33,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client  # Устанавливаем pg_isready
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.10'  # Синхронизируем с Dockerfile
 
       - name: Install dependencies
         run: |
@@ -47,22 +52,29 @@ jobs:
         run: |
           flake8 backend/
 
+      - name: Debug PostgreSQL logs
+        run: |
+          docker logs $(docker ps -q -f 'ancestor=postgres:14.0')  # Логи для отладки
+
+      - name: Check PostgreSQL connectivity
+        run: |
+          ping -c 4 db
+          nc -zv db 5432  # Проверка сетевой доступности
+
       - name: Wait for PostgreSQL to be ready
         run: |
-          echo "Checking PostgreSQL availability on db:5432..."
           for i in {1..30}; do
             if pg_isready -h db -p 5432 -U django -d django; then
               echo "PostgreSQL is ready!"
               break
-            else
-              echo "db:5432 - no response (attempt $i/30)"
-              sleep 5
+            fi
+            echo "Waiting for PostgreSQL to be ready... (attempt $i/30)"
+            sleep 5  # Увеличиваем интервал ожидания
+            if [ $i -eq 30 ]; then
+              echo "PostgreSQL is not ready after 30 attempts. Exiting..."
+              exit 1
             fi
           done
-          if ! pg_isready -h db -p 5432 -U django -d django; then
-            echo "Error: PostgreSQL failed to start after 150 seconds"
-            exit 1
-          fi
 
       - name: Run migrations
         env:
