@@ -1,6 +1,7 @@
 from django.db import models
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import MinValueValidator
 from users.models import User as User
+
 
 class Ingredient(models.Model):
     name = models.CharField(
@@ -60,7 +61,6 @@ class Recipe(models.Model):
 
 
 class IngredientInRecipe(models.Model):
-
     recipe = models.ForeignKey(
         Recipe,
         related_name="ingredients",
@@ -92,7 +92,6 @@ class IngredientInRecipe(models.Model):
 
 
 class Favorite(models.Model):
-
     user = models.ForeignKey(
         User,
         related_name="favorites",
@@ -111,7 +110,8 @@ class Favorite(models.Model):
         verbose_name_plural = "Избранное"
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "recipe"], name="unique_favorite"
+                fields=["user", "recipe"],
+                name="unique_favorite"
             )
         ]
 
@@ -120,7 +120,6 @@ class Favorite(models.Model):
 
 
 class ShoppingCart(models.Model):
-
     user = models.ForeignKey(
         User,
         related_name="shopping_cart",
@@ -139,7 +138,8 @@ class ShoppingCart(models.Model):
         verbose_name_plural = "Списки покупок"
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "recipe"], name="unique_shopping_cart"
+                fields=["user", "recipe"],
+                name="unique_shopping_cart"
             )
         ]
 
@@ -168,4 +168,4 @@ class ShortLink(models.Model):
         verbose_name_plural = "Короткие ссылки"
 
     def __str__(self):
-        return f"Короткая ссылка для {self.recipe}"
+        return f"Короткая ссылка для {self.recipe}\n"
