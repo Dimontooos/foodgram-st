@@ -49,10 +49,20 @@ jobs:
 
       - name: Wait for PostgreSQL to be ready
         run: |
-          while ! pg_isready -h db -p 5432 -U django -d django; do
-            echo "Waiting for PostgreSQL to be ready..."
-            sleep 2
+          echo "Checking PostgreSQL availability on db:5432..."
+          for i in {1..30}; do
+            if pg_isready -h db -p 5432 -U django -d django; then
+              echo "PostgreSQL is ready!"
+              break
+            else
+              echo "db:5432 - no response (attempt $i/30)"
+              sleep 5
+            fi
           done
+          if ! pg_isready -h db -p 5432 -U django -d django; then
+            echo "Error: PostgreSQL failed to start after 150 seconds"
+            exit 1
+          fi
 
       - name: Run migrations
         env:
