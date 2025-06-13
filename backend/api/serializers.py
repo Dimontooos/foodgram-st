@@ -306,7 +306,8 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
         ingredient_ids = set()
         for item in value:
-            if not isinstance(item, dict) or 'id' not in item or 'amount' not in item:
+            if (not isinstance(item, dict) or 'id' not in item
+                    or 'amount' not in item):
                 raise serializers.ValidationError(
                     "Каждый ингредиент должен быть объектом с полями id и "
                     "amount."
