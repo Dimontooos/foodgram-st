@@ -14,18 +14,18 @@ jobs:
 
     services:
       postgres:
-        image: postgres:14.0  
+        image: postgres:15-alpine
         env:
-          POSTGRES_USER: django
-          POSTGRES_PASSWORD: qwerty
-          POSTGRES_DB: django
+          POSTGRES_USER: foodgram
+          POSTGRES_PASSWORD: foodgram
+          POSTGRES_DB: foodgram
         ports:
           - 5432:5432
         options: >-
           --health-cmd pg_isready
-          --health-interval 15s
-          --health-timeout 10s
-          --health-retries 10
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout code
@@ -33,15 +33,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install PostgreSQL client
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client  # Установка pg_isready
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'  
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
@@ -52,63 +47,42 @@ jobs:
         run: |
           flake8 backend/
 
-      - name: Debug PostgreSQL logs
-        run: |
-          docker logs $(docker ps -q -f 'ancestor=postgres:14.0')  # Логи для отладки
-
-      - name: Check PostgreSQL connectivity
-        run: |
-          ping -c 4 db
-          nc -zv db 5432  # Проверка сетевой доступности
-
-      - name: Wait for PostgreSQL to be ready
-        run: |
-          for i in {1..30}; do
-            if pg_isready -h db -p 5432 -U django -d django; then
-              echo "PostgreSQL is ready!"
-              break
-            fi
-            echo "Waiting for PostgreSQL to be ready... (attempt $i/30)"
-            sleep 5
-            if [ $i -eq 30 ]; then
-              echo "PostgreSQL is not ready after 30 attempts. Exiting..."
-              exit 1
-            fi
-          done
-
       - name: Run migrations
         env:
-          DB_HOST: db
+          DB_HOST: localhost
           DB_PORT: 5432
-          POSTGRES_USER: django
-          POSTGRES_PASSWORD: qwerty
-          POSTGRES_DB: django
-          SECRET_KEY: django-insecure-6&-%5ecbx&al2#xr!*@-og6al!kp8qcl%1_k7auy#i6e@(2+iz
-          ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0
-          DEBUG: False
+          POSTGRES_USER: foodgram
+          POSTGRES_PASSWORD: foodgram
+          POSTGRES_DB: foodgram
+          SECRET_KEY: test-secret-key
         run: |
           cd backend
           python manage.py migrate
 
+      - name: Apply recipe migrations
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          POSTGRES_USER: foodgram
+          POSTGRES_PASSWORD: foodgram
+          POSTGRES_DB: foodgram
+          SECRET_KEY: test-secret-key
+        run: |
+          cd backend
+          python manage.py makemigrations recipes
+          python manage.py migrate 
+
       - name: Load test data
         env:
-          DB_HOST: db
+          DB_HOST: localhost
           DB_PORT: 5432
-          POSTGRES_USER: django
-          POSTGRES_PASSWORD: qwerty
-          POSTGRES_DB: django
-          SECRET_KEY: django-insecure-6&-%5ecbx&al2#xr!*@-og6al!kp8qcl%1_k7auy#i6e@(2+iz
-          ALLOWED_HOSTS: localhost,127.0.0.1,0.0.0.0
-          DEBUG: False
+          POSTGRES_USER: foodgram
+          POSTGRES_PASSWORD: foodgram
+          POSTGRES_DB: foodgram
+          SECRET_KEY: test-secret-key
         run: |
           cd backend
           python manage.py call_to_bd
-
-      - name: Check PostgreSQL status on failure
-        if: failure()
-        run: |
-          docker ps
-          docker logs $(docker ps -q -f 'ancestor=postgres:14.0')  # Логи для диагностики
 
   build_and_push_backend_to_docker_hub:
     needs: build
@@ -125,8 +99,8 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secretsDOCKERUSERNAME }}
+          password: ${{ secretsSDOCKERPASSWORD }}
 
       - name: Build and push backend image
         uses: docker/build-push-action@v6
@@ -134,7 +108,7 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
+          tags: ${{ secretsDOCKERUSERNAME }}/foodgram-backend:latest
 
   build_and_push_frontend_to_docker_hub:
     needs: build
@@ -151,8 +125,8 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secretsDOCKERUSERNAME }}
+          password: ${{ secretsSDOCKERPASSWORD }}
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v6
@@ -160,4 +134,4 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram-frontend:latest
+          tags: ${{ secretsDOCKERUSERNAME }}/foodgram-frontend:latest
