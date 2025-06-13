@@ -7,7 +7,9 @@ from users.models import User, Subscription
 from recipes.models import (
     Ingredient, Recipe, IngredientInRecipe, Favorite, ShoppingCart, ShortLink
 )
-from djoser.serializers import TokenCreateSerializer as BaseTokenCreateSerializer
+from djoser.serializers import (
+    TokenCreateSerializer as BaseTokenCreateSerializer
+)
 
 
 class Base64ImageField(serializers.ImageField):
