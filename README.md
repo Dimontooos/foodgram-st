@@ -19,6 +19,17 @@ Foodgram — это онлайн-платформа, где пользовате
 
 Для админки: просмотр всех пользователей по имени или email, поиск рецептов по названию и автору, отображените количество поиск ингредиентов по названию.
 
+Перенд запуском проекта необходимо зайти в папку infra/ и создать файл .env, далее внести в него содержимое 
+
+POSTGRES_USER=django
+POSTGRES_PASSWORD=qwerty
+POSTGRES_DB=django
+DB_HOST=db
+DB_PORT=5432
+SECRET_KEY=django-insecure-6&-%5ecbx&al2#xr!*@-og6al!kp8qcl%1_k7auy#i6e@(2+iz
+ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+DEBUG=False
+
 Для запуска докера проекта
 docker-compose down -v --remove-orphans
 docker-compose up -d --build
