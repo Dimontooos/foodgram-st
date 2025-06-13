@@ -59,19 +59,6 @@ jobs:
           cd backend
           python manage.py migrate
 
-      - name: Apply recipe migrations
-        env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          POSTGRES_USER: foodgram
-          POSTGRES_PASSWORD: foodgram
-          POSTGRES_DB: foodgram
-          SECRET_KEY: test-secret-key
-        run: |
-          cd backend
-          python manage.py makemigrations recipes
-          python manage.py migrate 
-
       - name: Load test data
         env:
           DB_HOST: localhost
@@ -82,7 +69,7 @@ jobs:
           SECRET_KEY: test-secret-key
         run: |
           cd backend
-          python manage.py call_to_bd
+          python manage.py load_test_data
 
   build_and_push_backend_to_docker_hub:
     needs: build
@@ -99,8 +86,8 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secretsDOCKERUSERNAME }}
-          password: ${{ secretsSDOCKERPASSWORD }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push backend image
         uses: docker/build-push-action@v6
@@ -108,7 +95,7 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: ${{ secretsDOCKERUSERNAME }}/foodgram-backend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram-backend:latest
 
   build_and_push_frontend_to_docker_hub:
     needs: build
@@ -125,8 +112,8 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secretsDOCKERUSERNAME }}
-          password: ${{ secretsSDOCKERPASSWORD }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v6
@@ -134,4 +121,4 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: ${{ secretsDOCKERUSERNAME }}/foodgram-frontend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram-frontend:latest
