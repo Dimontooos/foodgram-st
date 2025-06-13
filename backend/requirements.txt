@@ -19,3 +19,4 @@ pytest-pythonpath==0.7.3
 pytest-django==4.4.0
 drf-yasg==1.21
 reportlab==4.2.5
+flake8
