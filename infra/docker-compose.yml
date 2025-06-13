@@ -27,13 +27,13 @@ services:
     env_file: .env
 
   backend:
-      build: ../backend
-      volumes:
-        - static:/app/static/
-        - media:/app/media/
-      depends_on:
-        - db
-      env_file: .env
+    build: ../backend
+    volumes:
+      - static:/app/static/
+      - media:/app/media/
+    depends_on:
+      - db
+    env_file: .env
 
 volumes:
   pg_data:
