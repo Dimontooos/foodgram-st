@@ -8,8 +8,6 @@
 
 ### Контакты
 Email: [ardeev.dima2020@yandex.ru](mailto:ardeev.dima2020@yandex.ru)  
-GitHub: [github.com/Dimontooos](https://github.com/Dimontooos)  
-Проект: [ссылка на GitHub проекта](#)  
 
 ## О проекте Foodgram
 Foodgram — это онлайн-платформа для:
