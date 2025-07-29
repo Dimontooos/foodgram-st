@@ -36,5 +36,7 @@ class Command(BaseCommand):
             )
         else:
             self.stdout.write(
-                self.style.WARNING("No valid products found in the JSON file")
+                self.style.WARNING(
+                    "No valid products found in the JSON file"
+                )
             )

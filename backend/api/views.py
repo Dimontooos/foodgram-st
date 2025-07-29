@@ -366,7 +366,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         products = ProductInRecipe.objects.filter(
             recipe__shopping_carts__user=user,
             amount__gte=1
-        ).exclude(amount=0).select_related('ingredient').values(
+        ).exclude(
+            amount=0
+        ).select_related('ingredient').values(
             'ingredient__name',
             'ingredient__measurement_unit'
         ).annotate(
