@@ -1,7 +1,5 @@
 from django_filters import rest_framework as filters
-
-from recipes.models import Recipe, Ingredient
-from users.models import User
+from recipes.models import Recipe, Product, User
 
 
 class RecipeFilter(filters.FilterSet):
@@ -13,35 +11,33 @@ class RecipeFilter(filters.FilterSet):
         model = Recipe
         fields = ['author', 'is_favorited', 'is_in_shopping_cart']
 
-    def filter_author(self, queryset, name, value):
+    def filter_author(self, recipes, name, value):
         if not User.objects.filter(id=value).exists():
-            return queryset.none()
-        return queryset.filter(author__id=value)
+            return recipes.none()
+        return recipes.filter(author__id=value)
 
-    def filter_favorited(self, queryset, name, value):
-        queryset = queryset.select_related('author').prefetch_related(
-            'favorited_by'
-        )
+    def filter_favorited(self, recipes, name, value):
+        recipes = recipes.select_related(
+            'author').prefetch_related('favorites')
         if not self.request or self.request.user.is_anonymous:
-            return queryset
+            return recipes
         if value:
-            return queryset.filter(favorited_by__user=self.request.user)
-        return queryset.exclude(favorited_by__user=self.request.user)
+            return recipes.filter(favorites__user=self.request.user)
+        return recipes.exclude(favorites__user=self.request.user)
 
-    def filter_shopping_cart(self, queryset, name, value):
-        queryset = queryset.select_related('author').prefetch_related(
-            'in_shopping_cart'
-        )
+    def filter_shopping_cart(self, recipes, name, value):
+        recipes = recipes.select_related(
+            'author').prefetch_related('shopping_carts')
         if not self.request or self.request.user.is_anonymous:
-            return queryset
+            return recipes
         if value:
-            return queryset.filter(in_shopping_cart__user=self.request.user)
-        return queryset.exclude(in_shopping_cart__user=self.request.user)
+            return recipes.filter(shopping_carts__user=self.request.user)
+        return recipes.exclude(shopping_carts__user=self.request.user)
 
 
-class IngredientFilter(filters.FilterSet):
+class ProductFilter(filters.FilterSet):
     name = filters.CharFilter(field_name='name', lookup_expr='istartswith')
 
     class Meta:
-        model = Ingredient
+        model = Product
         fields = ['name']

@@ -12,7 +12,6 @@ django-filter==25.1
 python-decouple==3.7
 django-cors-headers==3.10.0
 shortuuid==1.0.9
-drf-extra-fields==3.2.1
 webcolors==1.11.1
 django-bootstrap5==22.2
 pytest-pythonpath==0.7.3
@@ -20,3 +19,5 @@ pytest-django==4.4.0
 drf-yasg==1.21
 reportlab==4.2.5
 flake8
+drf-extra-fields==3.7.0
+dotenv
