@@ -26,8 +26,9 @@ class RecipeFilter(filters.FilterSet):
         return recipes.exclude(favorites__user=self.request.user)
 
     def filter_shopping_cart(self, recipes, name, value):
-        recipes = recipes.select_related(
-            'author').prefetch_related('shopping_carts')
+        recipes = recipes.select_related('author').prefetch_related(
+            'shopping_carts'
+        )
         if not self.request or self.request.user.is_anonymous:
             return recipes
         if value:

@@ -15,12 +15,15 @@ class Command(BaseCommand):
             data = json.load(f)
 
         products = [
-            Product(name=item['name'], measurement_unit=item['measurement_unit'])
+            Product(name=item['name'],
+                    measurement_unit=item['measurement_unit'])
             for item in data if isinstance(item, dict) and 'name' in item and 'measurement_unit' in item
         ]
 
         if products:
             Product.objects.bulk_create(products, ignore_conflicts=True)
-            self.stdout.write(self.style.SUCCESS(f"Successfully loaded {len(products)} new products"))
+            self.stdout.write(self.style.SUCCESS(
+                f"Successfully loaded {len(products)} new products"))
         else:
-            self.stdout.write(self.style.WARNING("No valid products found in the JSON file"))
+            self.stdout.write(self.style.WARNING(
+                "No valid products found in the JSON file"))

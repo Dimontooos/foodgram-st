@@ -49,7 +49,7 @@ class User(AbstractUser):
 
 class Subscription(models.Model):
     user = models.ForeignKey(
-        'User', 
+        'User',
         related_name="subscriptions",
         on_delete=models.CASCADE,
         verbose_name="Подписчик",
@@ -107,7 +107,7 @@ class Product(models.Model):
 
 class Recipe(models.Model):
     author = models.ForeignKey(
-        'User',  
+        'User',
         on_delete=models.CASCADE,
         verbose_name="Автор",
         related_name="recipes"
