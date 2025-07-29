@@ -15,7 +15,10 @@ class User(AbstractUser):
         validators=[
             RegexValidator(
                 regex=r"^[\w.@+-]+\Z",
-                message="Логин может содержать только буквы, цифры и @/./+/-/_",
+                message=(
+                    "Логин может содержать только буквы, цифры и "
+                    "@/./+/-/_"
+                ),
             )
         ],
         verbose_name="Логин",
