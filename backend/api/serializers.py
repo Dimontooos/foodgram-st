@@ -90,9 +90,12 @@ class UserSerializer(DjoserUserSerializer):
     def get_is_subscribed(self, user):
         request = self.context.get('request')
         return (
-            request
-            and request.user.is_authenticated
-            and Subscription.objects.filter(user=request.user, author=user).exists()
+            request and
+            request.user.is_authenticated and
+            Subscription.objects.filter(
+                user=request.user,
+                author=user
+            ).exists()
         )
 
 
@@ -231,17 +234,23 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, recipe):
         request = self.context.get('request')
         return (
-            request
-            and request.user.is_authenticated
-            and Favorite.objects.filter(user=request.user, recipe=recipe).exists()
+            request and
+            request.user.is_authenticated and
+            Favorite.objects.filter(
+                user=request.user,
+                recipe=recipe
+            ).exists()
         )
 
     def get_is_in_shopping_cart(self, recipe):
         request = self.context.get('request')
         return (
-            request
-            and request.user.is_authenticated
-            and ShoppingCart.objects.filter(user=request.user, recipe=recipe).exists()
+            request and
+            request.user.is_authenticated and
+            ShoppingCart.objects.filter(
+                user=request.user,
+                recipe=recipe
+            ).exists()
         )
 
     def get_image(self, obj):
@@ -305,7 +314,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             if not Product.objects.filter(id=item['id'].id).exists():
                 raise serializers.ValidationError(
                     f"Ингредиент с id={item['id'].id} "
-                    "не существует."
+                    f"не существует."
                 )
         return value
 
