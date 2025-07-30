@@ -47,6 +47,18 @@ jobs:
         run: |
           flake8 backend/
 
+      - name: Create migrations
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          POSTGRES_USER: foodgram
+          POSTGRES_PASSWORD: foodgram
+          POSTGRES_DB: foodgram
+          SECRET_KEY: test-secret-key
+        run: |
+          cd backend
+          python manage.py makemigrations recipes
+
       - name: Run migrations
         env:
           DB_HOST: localhost
@@ -122,3 +134,4 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/foodgram-frontend:latest
+          
