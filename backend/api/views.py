@@ -54,9 +54,7 @@ class UserViewSet(DjoserUserViewSet):
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
         serializer = UserSerializer(
-            page or queryset,
-            many=True,
-            context={'request': request}
+            page or queryset, many=True, context={'request': request}
         )
         data = serializer.data
         return self.get_paginated_response(data) if page else Response({
@@ -364,16 +362,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         user = request.user
         products = ProductInRecipe.objects.filter(
-            recipe__shopping_carts__user=user,
-            amount__gte=1
-        ).exclude(
-            amount=0
-        ).select_related('ingredient').values(
-            'ingredient__name',
-            'ingredient__measurement_unit'
-        ).annotate(
-            total_amount=Sum('amount')
-        ).order_by('ingredient__name')
+            recipe__shopping_carts__user=user, amount__gte=1
+        ).exclude(amount=0).select_related('ingredient').values(
+            'ingredient__name', 'ingredient__measurement_unit'
+        ).annotate(total_amount=Sum('amount')).order_by('ingredient__name')
         recipes = Recipe.objects.filter(
             shopping_carts__user=user
         ).select_related('author')
