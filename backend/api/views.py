@@ -48,7 +48,11 @@ class UserViewSet(DjoserUserViewSet):
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [AllowAny()]
-        return [IsAuthenticated()] if self.action == 'me' else super().get_permissions()
+        return (
+            [IsAuthenticated()]
+            if self.action == 'me'
+            else super().get_permissions()
+        )
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -383,7 +387,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 "Ваш список покупок пуст.\n" if not products else
                 "Продукты:\n" + "\n".join(
                     f"{idx}. {item['ingredient__name'].capitalize()} - "
-                    f"{item['total_amount']} {item['ingredient__measurement_unit']}"
+                    f"{item['total_amount']} "
+                    f"{item['ingredient__measurement_unit']}"
                     for idx, item in enumerate(products, 1)
                 ) + "\n\nРецепты в списке:\n" + "\n".join(
                     f"{idx}. {recipe.name} (автор: {recipe.author.username})"

@@ -24,7 +24,9 @@ class Command(BaseCommand):
                 measurement_unit=item['measurement_unit']
             )
             for item in data
-            if isinstance(item, dict) and 'name' in item and 'measurement_unit' in item
+            if (isinstance(item, dict) and
+                'name' in item and
+                'measurement_unit' in item)
         ]
 
         if products:
@@ -37,7 +39,6 @@ class Command(BaseCommand):
         else:
             self.stdout.write(
                 self.style.WARNING(
-                    "No valid products found "
-                    "in the JSON file"
+                    "No valid products found in the JSON file"
                 )
             )
