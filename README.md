@@ -64,7 +64,9 @@ docker compose exec backend python manage.py load_products
 
 
 [Главная страница:] (http://localhost:8000/)
+
 [Админ-панель:] (http://localhost:8000/admin/)
+
 [Документация API:] (http://localhost:8000/api/docs/)
 
 
