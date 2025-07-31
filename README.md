@@ -38,7 +38,10 @@ Foodgram — это онлайн-платформа для:
 ## Установка и запуск
 
 ### 1. Копирование репозитория
-Склонируйте репозиторий через команду git clone https://github.com/Dimontooos/foodgram-st.git
+Склонируйте репозиторий через команду 
+```
+git clone https://github.com/Dimontooos/foodgram-st.git
+```
 ### 2. Настройка окружения
 Создайте файл `infra/.env` со следующим содержимым:
 ```env
@@ -54,8 +57,10 @@ DEBUG=False
 ### 3. Настройка окружения
 откройте терминал GitBush и перейдите в папку infra/
 ведите команды
+```
 docker-compose down -v --remove-orphans
 docker-compose up -d --build
+```
 
 ### 4. Инициализация базы данных
 docker compose exec backend python manage.py migrate
