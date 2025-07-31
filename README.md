@@ -50,7 +50,7 @@ DB_PORT=5432
 SECRET_KEY=django-insecure-6&-%5ecbx&al2#xr!*@-og6al!kp8qcl%1_k7auy#i6e@(2+iz
 ALLOWED_HOSTS=localhost,127.0.0.1
 DEBUG=False
-
+```
 ### 3. Настройка окружения
 откройте терминал GitBush и перейдите в папку infra/
 ведите команды
